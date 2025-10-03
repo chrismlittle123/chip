@@ -4,6 +4,8 @@ import { Excalidraw } from '@excalidraw/excalidraw'
 import { useState } from 'react'
 import { exportToBlob } from '@excalidraw/excalidraw'
 import type { ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types/types'
+import yaml from 'js-yaml'
+import Ajv from 'ajv'
 
 interface ExcalidrawCanvasProps {
   onSendToChat: (imageDataUrl: string) => void
@@ -13,6 +15,8 @@ interface ExcalidrawCanvasProps {
 export default function ExcalidrawCanvas({ onSendToChat, yamlSpec }: ExcalidrawCanvasProps) {
   const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null)
   const [isSending, setIsSending] = useState(false)
+  const [validationResult, setValidationResult] = useState<{ valid: boolean; message: string } | null>(null)
+  const [isValidating, setIsValidating] = useState(false)
 
   const handleSendToChat = async () => {
     if (!excalidrawAPI) {
@@ -52,6 +56,49 @@ export default function ExcalidrawCanvas({ onSendToChat, yamlSpec }: ExcalidrawC
       console.error('Error sending to chat:', error)
       alert('Failed to send to chat. Check console for details.')
       setIsSending(false)
+    }
+  }
+
+  const handleValidateSpec = async () => {
+    setIsValidating(true)
+    setValidationResult(null)
+
+    try {
+      // Parse the YAML specification
+      const parsedYaml = yaml.load(yamlSpec)
+
+      // Fetch the schema
+      const schemaResponse = await fetch('/schemas/api-specification.yml')
+      const schemaText = await schemaResponse.text()
+      const schema = yaml.load(schemaText)
+
+      // Validate using AJV
+      const ajv = new Ajv({ allErrors: true, strict: false })
+      const validate = ajv.compile(schema as object)
+      const valid = validate(parsedYaml)
+
+      if (valid) {
+        setValidationResult({
+          valid: true,
+          message: '✓ Specification is valid!'
+        })
+      } else {
+        const errors = validate.errors?.map(err =>
+          `${err.instancePath || 'root'}: ${err.message}`
+        ).join('\n') || 'Unknown validation error'
+
+        setValidationResult({
+          valid: false,
+          message: `✗ Validation failed:\n${errors}`
+        })
+      }
+    } catch (error) {
+      setValidationResult({
+        valid: false,
+        message: `✗ Error: ${error instanceof Error ? error.message : 'Failed to validate'}`
+      })
+    } finally {
+      setIsValidating(false)
     }
   }
 
@@ -134,7 +181,10 @@ export default function ExcalidrawCanvas({ onSendToChat, yamlSpec }: ExcalidrawC
           flex: 1,
           overflowY: 'auto',
           padding: '20px',
-          backgroundColor: '#f8f8f8'
+          backgroundColor: '#f8f8f8',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
         }}>
           <pre style={{
             margin: 0,
@@ -143,10 +193,45 @@ export default function ExcalidrawCanvas({ onSendToChat, yamlSpec }: ExcalidrawC
             lineHeight: '1.6',
             color: '#333',
             whiteSpace: 'pre-wrap',
-            wordWrap: 'break-word'
+            wordWrap: 'break-word',
+            flex: 1
           }}>
             {yamlSpec}
           </pre>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button
+              onClick={handleValidateSpec}
+              disabled={isValidating}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: isValidating ? '#ccc' : '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: isValidating ? 'not-allowed' : 'pointer',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+              }}
+            >
+              {isValidating ? 'Validating...' : 'Validate Specification'}
+            </button>
+            {validationResult && (
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: '6px',
+                backgroundColor: validationResult.valid ? '#d4edda' : '#f8d7da',
+                border: `1px solid ${validationResult.valid ? '#c3e6cb' : '#f5c6cb'}`,
+                color: validationResult.valid ? '#155724' : '#721c24',
+                fontSize: '13px',
+                fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word'
+              }}>
+                {validationResult.message}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

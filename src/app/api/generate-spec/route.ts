@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import fs from 'fs'
+import path from 'path'
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,6 +10,10 @@ export async function POST(request: NextRequest) {
     if (!image) {
       return NextResponse.json({ error: 'No image provided' }, { status: 400 })
     }
+
+    // Read the YAML schema
+    const schemaPath = path.join(process.cwd(), 'schemas', 'api-specification.yml')
+    const schemaContent = fs.readFileSync(schemaPath, 'utf-8')
 
     // Initialize Anthropic client
     const anthropic = new Anthropic({
@@ -43,13 +49,19 @@ export async function POST(request: NextRequest) {
               type: 'text',
               text: `You are an expert system architect. Analyze this architecture diagram and generate a detailed YAML specification that describes the system.
 
-The YAML should include:
-- version: specification version
-- name: system name
-- description: brief description
-- components: list of all components/services with their properties (name, type, technology/framework, description)
-- connections: relationships between components (from, to, protocol/type, description)
-- deployment: deployment information if visible
+IMPORTANT: Your YAML output MUST conform to the following schema:
+
+\`\`\`yaml
+${schemaContent}
+\`\`\`
+
+Follow these guidelines:
+1. The YAML must be valid and conform to the schema structure above
+2. Required fields: version, name, components
+3. Each component must have: name, type (and optionally: description, technology, endpoints, properties)
+4. For API components, include endpoints with: path, method (and optionally: description, payload, response)
+5. Include connections array if there are relationships between components (from, to, protocol, description)
+6. Include deployment object if deployment info is visible (platform, regions, environment)
 
 Be thorough and accurate. Only include information that is clearly visible in the diagram. Return ONLY the YAML specification, no additional text or explanation.`,
             },

@@ -293,3 +293,7 @@ WHAT ABOUT DUMB THINGS LIKE HAVING TO KILL PORTS OR DOCKER CONTAINERS, etc. gett
 
 
 WHAT ABOUT PROBLEMS LIKE CACHE, ETC.?? I kind think that I should monitor implementation and AS SOON as there is an issue, stop it, fix it with Claude, then let Claude finish the job?
+
+
+
+Be able to "Save" progress and move between different "Features" or "Sessions" ??? how would this work?
