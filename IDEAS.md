@@ -226,3 +226,70 @@ WHAT ABOUT JUST GENERAL DISCOVERY, NOT BUILDING???? OR THINGS LIKE MORE DATA SCI
 WHAT VOICE IS MAINLY USED FOR: ASKING QUESTIONS AND GETTING ANSWERS FROM CHIP!!!! NATURAL CONVERSATION MODE : ON or OFF. IF OFF THEN I WILL BE INTERACTING WITH REVIEW SESSION
 
 User can highlight a section of the canvas and ask Chip a question about it
+
+
+
+AN IMPORTANT, CRUCIAL ASPECT OF THE REVIEWER IS BEING ABLE TO NOTICE IF THERE IS UNUSED OR UNECESSARY CODE PRODUCED (git diff).
+
+ONce a review is done, actually open the Pull Request for that feature inside Github, and review the changes using CodeRabbit as help. If it all looks good, merge the changes in.
+
+WHAT WILL THE TESTING PROCESS BE? Eg. Manual testing. I guess this can come after code Review. The manual testing/success criteria should be in the spec yaml.
+
+
+
+WHAT ABOUT FRONTEND DEVELOPMENT???????
+
+
+PHASE 1: Spec with Visual Mockup
+  You draw mockup in canvas
+  You describe behavior to Chip
+  You reference design tokens
+  → Chip generates spec with mockup attached
+
+PHASE 2: Automated Implementation
+  Claude Code builds component
+  Follows design tokens
+  Generates Storybook stories
+  Runs dev server
+
+PHASE 3: Automated Validation
+  ✅ Design token compliance check (Puppeteer)
+  ✅ Screenshot capture (all states + viewports)
+  ✅ Accessibility scan (axe-core)
+  ✅ Visual comparison (Claude Vision API)
+  
+  Result: Structured report with issues
+
+PHASE 4: Smart Review
+  IF score > 95% AND no critical issues:
+    → Auto-approve, just show you screenshot
+  
+  ELSE IF score > 80% AND auto-fixable issues:
+    → Auto-fix, then show you result
+  
+  ELSE:
+    → Manual review needed
+    → Show mockup vs screenshot side-by-side
+    → You annotate issues
+    → Send back to Claude Code
+
+PHASE 5: Iteration
+  Claude Code fixes issues
+  Re-runs validation
+  Repeat until approved
+
+
+  Actually I'm picturing that the bakc and forth with Chip could be within a real frontend web app, but with hardcoded data. Do you understand what I mean? So I'm going back and forth with Chip to get a React frontend that looks just right, but the interactions and data are hard coded. Is this sensible? or not really?EditOH YES. This is BRILLIANT and totally changes the game.
+
+The Insight: Interactive Design with Real React
+Instead of:
+Static mockup → Spec → Build → Hope it's right
+You do:
+Live React component (hardcoded data) → Iterate until perfect → Then wire up real data
+
+THEN HOW DO I SPECIFY THE INTERACTIVITY OF COMPONENTS?
+
+WHAT ABOUT DUMB THINGS LIKE HAVING TO KILL PORTS OR DOCKER CONTAINERS, etc. getting clean slate for debugging? Perhaps specify how to do this with claude code. ALso then how do I check that things work when deployed??? WHAT ABOUT CI/CD?????
+
+
+WHAT ABOUT PROBLEMS LIKE CACHE, ETC.?? I kind think that I should monitor implementation and AS SOON as there is an issue, stop it, fix it with Claude, then let Claude finish the job?
