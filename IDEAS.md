@@ -218,3 +218,11 @@ Phase 3: REVIEW (??? - let's figure this out)
 
 
 WHAT ABOUT JUST GENERAL DISCOVERY, NOT BUILDING???? OR THINGS LIKE MORE DATA SCIENCE/ML ENGINEER WORK? How about we crack software engineering work first! then it should become more obvious with time.
+
+
+
+-----
+
+WHAT VOICE IS MAINLY USED FOR: ASKING QUESTIONS AND GETTING ANSWERS FROM CHIP!!!! NATURAL CONVERSATION MODE : ON or OFF. IF OFF THEN I WILL BE INTERACTING WITH REVIEW SESSION
+
+User can highlight a section of the canvas and ask Chip a question about it
