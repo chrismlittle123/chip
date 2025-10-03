@@ -1,0 +1,300 @@
+# JSON Schema for API Specification (in YAML format)
+# This schema defines the structure for architecture specifications
+
+$schema: http://json-schema.org/draft-07/schema#
+$id: https://chip.dev/schemas/api-specification.yml
+title: API Architecture Specification
+description: Schema for defining API architectures and their components
+
+type: object
+required:
+  - version
+  - name
+  - components
+
+properties:
+  version:
+    type: string
+    description: Version of the specification format
+    pattern: '^\d+\.\d+$'
+    examples:
+      - '1.0'
+      - '2.1'
+
+  name:
+    type: string
+    description: Name of the system or service
+    minLength: 1
+    maxLength: 200
+
+  description:
+    type: string
+    description: Brief description of the system
+    maxLength: 1000
+
+  components:
+    type: array
+    description: List of components/services in the architecture
+    minItems: 1
+    items:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: Component name
+          minLength: 1
+
+        type:
+          type: string
+          description: Component type (e.g., REST API, database, service)
+          examples:
+            - REST API
+            - GraphQL API
+            - Database
+            - Message Queue
+            - Cache
+            - Service
+
+        description:
+          type: string
+          description: Component description
+
+        technology:
+          type: string
+          description: Technology or framework used
+          examples:
+            - Node.js
+            - Python
+            - PostgreSQL
+            - Redis
+            - RabbitMQ
+
+        endpoints:
+          type: array
+          description: API endpoints (for API components)
+          items:
+            type: object
+            required:
+              - path
+              - method
+            properties:
+              path:
+                type: string
+                description: Endpoint path
+                pattern: '^/'
+                examples:
+                  - /health
+                  - /api/v1/users
+                  - /add-integers
+
+              method:
+                type: string
+                description: HTTP method
+                enum:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                  - HEAD
+
+              description:
+                type: string
+                description: Endpoint description
+
+              payload:
+                type: object
+                description: Request payload schema
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      - object
+                      - array
+                      - string
+                      - number
+                      - integer
+                      - boolean
+
+                  properties:
+                    type: object
+                    description: Object properties (when type is object)
+                    additionalProperties:
+                      $ref: '#/definitions/propertySchema'
+
+                  items:
+                    description: Array item schema (when type is array)
+                    $ref: '#/definitions/propertySchema'
+
+              response:
+                type: object
+                description: Response schema
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      - object
+                      - array
+                      - string
+                      - number
+                      - integer
+                      - boolean
+
+                  properties:
+                    type: object
+                    description: Object properties (when type is object)
+                    additionalProperties:
+                      $ref: '#/definitions/propertySchema'
+
+                  items:
+                    description: Array item schema (when type is array)
+                    $ref: '#/definitions/propertySchema'
+
+        properties:
+          type: object
+          description: Additional component properties
+          additionalProperties: true
+
+  connections:
+    type: array
+    description: Connections between components
+    items:
+      type: object
+      required:
+        - from
+        - to
+      properties:
+        from:
+          type: string
+          description: Source component name
+
+        to:
+          type: string
+          description: Target component name
+
+        protocol:
+          type: string
+          description: Connection protocol or type
+          examples:
+            - HTTPS
+            - HTTP
+            - TCP
+            - WebSocket
+            - gRPC
+            - AMQP
+
+        description:
+          type: string
+          description: Connection description
+
+  deployment:
+    type: object
+    description: Deployment configuration
+    properties:
+      platform:
+        type: string
+        description: Deployment platform
+        examples:
+          - AWS
+          - Azure
+          - GCP
+          - Kubernetes
+          - Docker
+          - Heroku
+
+      regions:
+        type: array
+        description: Deployment regions
+        items:
+          type: string
+        examples:
+          - - us-east-1
+            - us-west-2
+
+      environment:
+        type: string
+        description: Environment type
+        enum:
+          - development
+          - staging
+          - production
+
+definitions:
+  propertySchema:
+    type: object
+    properties:
+      type:
+        type: string
+        enum:
+          - object
+          - array
+          - string
+          - number
+          - integer
+          - boolean
+          - null
+
+      description:
+        type: string
+
+      properties:
+        type: object
+        description: Nested object properties
+        additionalProperties:
+          $ref: '#/definitions/propertySchema'
+
+      items:
+        description: Array item schema
+        $ref: '#/definitions/propertySchema'
+
+      required:
+        type: array
+        items:
+          type: string
+
+      enum:
+        type: array
+        description: Allowed values
+
+      minimum:
+        type: number
+
+      maximum:
+        type: number
+
+      minLength:
+        type: integer
+
+      maxLength:
+        type: integer
+
+      pattern:
+        type: string
+        description: Regex pattern
+
+examples:
+  - version: '1.0'
+    name: 'API Calculator Service'
+    description: 'RESTful calculator service with endpoints for integer and decimal arithmetic operations'
+    components:
+      - name: api-service
+        type: REST API
+        description: 'API service exposing calculator endpoints'
+        endpoints:
+          - path: /health
+            method: GET
+            description: 'Health check endpoint'
+
+          - path: /add-integers
+            method: POST
+            payload:
+              type: object
+              properties:
+                int1:
+                  type: integer
+                int2:
+                  type: integer

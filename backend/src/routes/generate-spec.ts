@@ -1,18 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
+import express from 'express'
 import Anthropic from '@anthropic-ai/sdk'
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-export async function POST(request: NextRequest) {
+const router = express.Router()
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+router.post('/generate-spec', async (req, res) => {
   try {
-    const { image } = await request.json()
+    const { image } = req.body
 
     if (!image) {
-      return NextResponse.json({ error: 'No image provided' }, { status: 400 })
+      return res.status(400).json({ error: 'No image provided' })
     }
 
-    // Read the YAML schema
-    const schemaPath = path.join(process.cwd(), 'schemas', 'api-specification.yml')
+    // Read the YAML schema from the root schemas directory
+    const schemaPath = path.join(__dirname, '../../../schemas', 'api-specification.yml')
     const schemaContent = fs.readFileSync(schemaPath, 'utf-8')
 
     // Initialize Anthropic client
@@ -23,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Extract base64 data and media type from data URL
     const matches = image.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)
     if (!matches || matches.length !== 3) {
-      return NextResponse.json({ error: 'Invalid image format' }, { status: 400 })
+      return res.status(400).json({ error: 'Invalid image format' })
     }
 
     const mediaType = matches[1]
@@ -81,12 +87,14 @@ Be thorough and accurate. Only include information that is clearly visible in th
       cleanYaml = cleanYaml.replace(/^```\n/, '').replace(/\n```$/, '')
     }
 
-    return NextResponse.json({ yaml: cleanYaml })
+    res.json({ yaml: cleanYaml })
   } catch (error) {
     console.error('Error generating specification:', error)
-    return NextResponse.json(
-      { error: 'Failed to generate specification', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    )
+    res.status(500).json({
+      error: 'Failed to generate specification',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    })
   }
-}
+})
+
+export default router

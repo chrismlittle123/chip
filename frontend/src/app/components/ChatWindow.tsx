@@ -57,7 +57,8 @@ export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenera
 
     // Call API to analyze the image
     try {
-      const response = await fetch('/api/generate-spec', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const response = await fetch(`${apiUrl}/api/generate-spec`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
