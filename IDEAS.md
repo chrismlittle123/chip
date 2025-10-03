@@ -297,3 +297,23 @@ WHAT ABOUT PROBLEMS LIKE CACHE, ETC.?? I kind think that I should monitor implem
 
 
 Be able to "Save" progress and move between different "Features" or "Sessions" ??? how would this work?
+
+VERSIONING OF CHIP SESSIONS (VIEW HISTORY?? branching and commits?)
+
+Versioning of the spec yamls as well??
+
+How can I teach Chip using existing code? Or reference pre-existing working examples (eg. copying from example code snippets online). This should be proactive, prompting me to find and provide such examples wherever we're implementing something new/cutting edge. 
+
+
+How do I make the feedback loop shorter for Claude Code? Should I specify some implementation in the specification? If for example I want claude to implement something in a certain way?
+
+
+How can Chip help me make good architecture decisions? And then help me go back to previous versions if that architecture decision was wrong?
+
+How should I do manual, real world testing? This has to be me, no automation here, but how do I streamline this??
+
+
+Can I implement A/B testing for architecture designs with specific criteria?
+
+
+What about Documentation? What are my methods for producing documentation?
