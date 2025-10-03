@@ -6,6 +6,20 @@ import ChatWindow from './ChatWindow'
 
 export default function TabNavigation() {
   const [activeTab, setActiveTab] = useState<'canvas' | 'chat'>('canvas')
+  const [canvasImage, setCanvasImage] = useState<string | null>(null)
+  const [yamlSpec, setYamlSpec] = useState<string>(`# Draw your architecture diagram
+# Then click "Send to Chat" to discuss it with Chip
+
+# Your generated specification will appear here...`)
+
+  const handleSendToChat = (imageDataUrl: string) => {
+    setCanvasImage(imageDataUrl)
+    setActiveTab('chat')
+  }
+
+  const handleYamlGenerated = (yaml: string) => {
+    setYamlSpec(yaml)
+  }
 
   return (
     <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' }}>
@@ -51,7 +65,16 @@ export default function TabNavigation() {
         </button>
       </div>
       <div style={{ flex: 1, overflow: 'hidden', paddingTop: '20px' }}>
-        {activeTab === 'canvas' ? <ExcalidrawCanvas /> : <ChatWindow />}
+        <div style={{ display: activeTab === 'canvas' ? 'block' : 'none', height: '100%' }}>
+          <ExcalidrawCanvas onSendToChat={handleSendToChat} yamlSpec={yamlSpec} />
+        </div>
+        <div style={{ display: activeTab === 'chat' ? 'block' : 'none', height: '100%' }}>
+          <ChatWindow
+            canvasImage={canvasImage}
+            onImageProcessed={() => setCanvasImage(null)}
+            onYamlGenerated={handleYamlGenerated}
+          />
+        </div>
       </div>
     </div>
   )

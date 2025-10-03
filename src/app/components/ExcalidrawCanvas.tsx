@@ -1,42 +1,59 @@
 'use client'
 
 import { Excalidraw } from '@excalidraw/excalidraw'
+import { useState } from 'react'
+import { exportToBlob } from '@excalidraw/excalidraw'
+import type { ExcalidrawImperativeAPI } from '@excalidraw/excalidraw/types/types'
 
-export default function ExcalidrawCanvas() {
-  const sampleYaml = `# System Architecture Specification
-version: "1.0"
-name: "Example Architecture"
+interface ExcalidrawCanvasProps {
+  onSendToChat: (imageDataUrl: string) => void
+  yamlSpec: string
+}
 
-components:
-  - name: "Frontend"
-    type: "web-app"
-    framework: "React"
-    description: "User-facing web application"
+export default function ExcalidrawCanvas({ onSendToChat, yamlSpec }: ExcalidrawCanvasProps) {
+  const [excalidrawAPI, setExcalidrawAPI] = useState<ExcalidrawImperativeAPI | null>(null)
+  const [isSending, setIsSending] = useState(false)
 
-  - name: "Backend API"
-    type: "api-service"
-    framework: "Node.js"
-    description: "RESTful API server"
+  const handleSendToChat = async () => {
+    if (!excalidrawAPI) {
+      alert('Canvas not ready yet')
+      return
+    }
 
-  - name: "Database"
-    type: "database"
-    engine: "PostgreSQL"
-    description: "Primary data store"
+    setIsSending(true)
 
-connections:
-  - from: "Frontend"
-    to: "Backend API"
-    protocol: "HTTPS"
+    try {
+      // Get canvas elements
+      const elements = excalidrawAPI.getSceneElements()
 
-  - from: "Backend API"
-    to: "Database"
-    protocol: "TCP"
+      if (elements.length === 0) {
+        alert('Please draw something on the canvas first!')
+        setIsSending(false)
+        return
+      }
 
-deployment:
-  platform: "AWS"
-  regions:
-    - "us-east-1"
-`
+      // Export canvas as image blob
+      const blob = await exportToBlob({
+        elements: elements,
+        appState: excalidrawAPI.getAppState(),
+        files: excalidrawAPI.getFiles(),
+      })
+
+      // Convert blob to base64
+      const reader = new FileReader()
+      reader.readAsDataURL(blob)
+
+      reader.onloadend = async () => {
+        const base64Image = reader.result as string
+        onSendToChat(base64Image)
+        setIsSending(false)
+      }
+    } catch (error) {
+      console.error('Error sending to chat:', error)
+      alert('Failed to send to chat. Check console for details.')
+      setIsSending(false)
+    }
+  }
 
   return (
     <div style={{
@@ -60,14 +77,37 @@ deployment:
         <div style={{
           padding: '20px 24px',
           borderBottom: '1px solid #e0e0e0',
-          fontSize: '20px',
-          fontWeight: '600',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}>
-          Draw Your Architecture
+          <div style={{
+            fontSize: '20px',
+            fontWeight: '600',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+          }}>
+            Draw Your Architecture
+          </div>
+          <button
+            onClick={handleSendToChat}
+            disabled={isSending}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: isSending ? '#ccc' : '#0066cc',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: isSending ? 'not-allowed' : 'pointer',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+            }}
+          >
+            {isSending ? 'Sending...' : 'Send to Chat'}
+          </button>
         </div>
         <div style={{ flex: 1, position: 'relative' }}>
-          <Excalidraw />
+          <Excalidraw excalidrawAPI={(api) => setExcalidrawAPI(api)} />
         </div>
       </div>
 
@@ -105,7 +145,7 @@ deployment:
             whiteSpace: 'pre-wrap',
             wordWrap: 'break-word'
           }}>
-            {sampleYaml}
+            {yamlSpec}
           </pre>
         </div>
       </div>

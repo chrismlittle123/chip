@@ -5,20 +5,28 @@ import { useState, useRef, useEffect } from 'react'
 interface Message {
   id: string
   sender: 'user' | 'chip'
-  text: string
+  text?: string
+  image?: string
   timestamp: Date
 }
 
-export default function ChatWindow() {
+interface ChatWindowProps {
+  canvasImage: string | null
+  onImageProcessed: () => void
+  onYamlGenerated: (yaml: string) => void
+}
+
+export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenerated }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       sender: 'chip',
-      text: 'Hi! I\'m Chip. I can help you convert your architecture drawings into code. Draw something in the Canvas tab and come back here to chat with me!',
+      text: 'Hi! I\'m Chip. I can help you convert your architecture drawings into code. Draw something in the Canvas tab and click "Send to Chat" to share it with me!',
       timestamp: new Date()
     }
   ])
   const [inputValue, setInputValue] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -28,6 +36,69 @@ export default function ChatWindow() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (canvasImage && !isProcessing) {
+      handleCanvasImage(canvasImage)
+    }
+  }, [canvasImage])
+
+  const handleCanvasImage = async (imageDataUrl: string) => {
+    setIsProcessing(true)
+
+    // Add user's canvas image to chat
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'user',
+      image: imageDataUrl,
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, userMessage])
+
+    // Call API to analyze the image
+    try {
+      const response = await fetch('/api/generate-spec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: imageDataUrl }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze image')
+      }
+
+      const data = await response.json()
+
+      // Update the YAML spec in the Canvas tab
+      onYamlGenerated(data.yaml)
+
+      // Add Chip's response with the YAML spec
+      setTimeout(() => {
+        const chipResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          sender: 'chip',
+          text: `I've analyzed your architecture diagram! Here's the YAML specification I generated:\n\n\`\`\`yaml\n${data.yaml}\n\`\`\`\n\nWould you like me to help you implement this, or would you like to make any changes?`,
+          timestamp: new Date()
+        }
+        setMessages(prev => [...prev, chipResponse])
+        setIsProcessing(false)
+        onImageProcessed()
+      }, 1000)
+    } catch (error) {
+      console.error('Error analyzing image:', error)
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'chip',
+        text: 'Sorry, I had trouble analyzing your diagram. Please try again!',
+        timestamp: new Date()
+      }
+      setMessages(prev => [...prev, errorResponse])
+      setIsProcessing(false)
+      onImageProcessed()
+    }
+  }
 
   const handleSend = () => {
     if (!inputValue.trim()) return
@@ -127,8 +198,8 @@ export default function ChatWindow() {
               }}
             >
               <div style={{
-                maxWidth: '70%',
-                padding: '12px 16px',
+                maxWidth: message.image ? '90%' : '70%',
+                padding: message.image ? '8px' : '12px 16px',
                 borderRadius: '12px',
                 backgroundColor: message.sender === 'user' ? '#0066cc' : '#f0f0f0',
                 color: message.sender === 'user' ? 'white' : '#333',
@@ -136,7 +207,22 @@ export default function ChatWindow() {
                 fontSize: '15px',
                 lineHeight: '1.5'
               }}>
-                {message.text}
+                {message.image && (
+                  <img
+                    src={message.image}
+                    alt="Canvas screenshot"
+                    style={{
+                      maxWidth: '100%',
+                      borderRadius: '8px',
+                      display: 'block'
+                    }}
+                  />
+                )}
+                {message.text && (
+                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                    {message.text}
+                  </div>
+                )}
               </div>
             </div>
           ))}
