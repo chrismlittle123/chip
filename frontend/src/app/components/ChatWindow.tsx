@@ -158,25 +158,26 @@ export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenera
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: '#f5f5f5',
+      backgroundColor: '#1a1a1a',
       padding: '20px'
     }}>
       <div style={{
         width: '100%',
         height: '100%',
         maxWidth: '1000px',
-        backgroundColor: 'white',
+        backgroundColor: '#0a0a0a',
         borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+        border: '1px solid #333',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column'
       }}>
         <div style={{
           padding: '20px 24px',
-          borderBottom: '1px solid #e0e0e0',
+          borderBottom: '1px solid #333',
           fontSize: '20px',
           fontWeight: '600',
+          color: '#e0e0e0',
           fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
         }}>
           Chat with Chip
@@ -188,7 +189,8 @@ export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenera
           padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px'
+          gap: '16px',
+          backgroundColor: '#0a0a0a'
         }}>
           {messages.map(message => (
             <div
@@ -202,8 +204,9 @@ export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenera
                 maxWidth: message.image ? '90%' : '70%',
                 padding: message.image ? '8px' : '12px 16px',
                 borderRadius: '12px',
-                backgroundColor: message.sender === 'user' ? '#0066cc' : '#f0f0f0',
-                color: message.sender === 'user' ? 'white' : '#333',
+                backgroundColor: message.sender === 'user' ? '#e85d2a' : '#1a1a1a',
+                border: message.sender === 'chip' ? '1px solid #333' : 'none',
+                color: message.sender === 'user' ? 'white' : '#e0e0e0',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                 fontSize: '15px',
                 lineHeight: '1.5'
@@ -232,7 +235,7 @@ export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenera
 
         <div style={{
           padding: '16px',
-          borderTop: '1px solid #e0e0e0',
+          borderTop: '1px solid #333',
           display: 'flex',
           gap: '12px'
         }}>
@@ -245,9 +248,11 @@ export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenera
             style={{
               flex: 1,
               padding: '12px 16px',
-              border: '1px solid #e0e0e0',
+              border: '1px solid #333',
               borderRadius: '8px',
               fontSize: '15px',
+              backgroundColor: '#1a1a1a',
+              color: '#e0e0e0',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
               outline: 'none'
             }}
@@ -256,14 +261,15 @@ export default function ChatWindow({ canvasImage, onImageProcessed, onYamlGenera
             onClick={handleSend}
             style={{
               padding: '12px 24px',
-              backgroundColor: '#0066cc',
+              backgroundColor: '#e85d2a',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               fontSize: '15px',
               fontWeight: '600',
               cursor: 'pointer',
-              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              transition: 'all 0.2s'
             }}
           >
             Send

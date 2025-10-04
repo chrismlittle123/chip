@@ -22,11 +22,11 @@ export default function TabNavigation() {
   }
 
   return (
-    <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', backgroundColor: '#1a1a1a' }}>
       <div style={{
         display: 'flex',
-        borderBottom: '2px solid #e0e0e0',
-        backgroundColor: '#fff',
+        borderBottom: '1px solid #333',
+        backgroundColor: '#0a0a0a',
         padding: '0 20px'
       }}>
         <button
@@ -35,8 +35,8 @@ export default function TabNavigation() {
             padding: '16px 32px',
             border: 'none',
             backgroundColor: 'transparent',
-            borderBottom: activeTab === 'canvas' ? '3px solid #0066cc' : '3px solid transparent',
-            color: activeTab === 'canvas' ? '#0066cc' : '#666',
+            borderBottom: activeTab === 'canvas' ? '3px solid #e85d2a' : '3px solid transparent',
+            color: activeTab === 'canvas' ? '#e85d2a' : '#999',
             fontSize: '16px',
             fontWeight: '600',
             cursor: 'pointer',
@@ -52,8 +52,8 @@ export default function TabNavigation() {
             padding: '16px 32px',
             border: 'none',
             backgroundColor: 'transparent',
-            borderBottom: activeTab === 'chat' ? '3px solid #0066cc' : '3px solid transparent',
-            color: activeTab === 'chat' ? '#0066cc' : '#666',
+            borderBottom: activeTab === 'chat' ? '3px solid #e85d2a' : '3px solid transparent',
+            color: activeTab === 'chat' ? '#e85d2a' : '#999',
             fontSize: '16px',
             fontWeight: '600',
             cursor: 'pointer',
